@@ -1,5 +1,5 @@
-"use client"
-import React from "react";
+"use client";
+import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,12 +10,39 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import EmojiPicker from "emoji-picker-react";
+import { db } from "@/utils/dbConfig";
+import { Budgets } from "@/utils/schema";
+import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 const CreateBudget = () => {
+  const [emojiIcon, setEmojiIcon] = useState("Use Emoji");
+  const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
+
+  const [name, setName] = useState();
+  const [amount, setAmount] = useState();
+  const { user } = useUser();
+
+  const onCreateBudget = async () => {
+    const result = await db
+      .insert(Budgets)
+      .values({
+        id: user?.id,
+        name: name,
+        amount: amount,
+        createdBy: user?.primaryEmailAddress?.emailAddress,
+        icon: emojiIcon,
+      })
+      .returning({ insertedId: Budgets.id });
+    if (result) {
+      toast("New Budget Added!");
+    }
+  };
+
   return (
     <div>
       <Dialog>
@@ -29,33 +56,50 @@ const CreateBudget = () => {
           <DialogHeader>
             <DialogTitle>Create New Budget</DialogTitle>
             <DialogDescription>
-              <EmojiPicker></EmojiPicker>
+              <div className="mt-5">
+                <Button
+                  variant="outline"
+                  onClick={() => setOpenEmojiPicker(!openEmojiPicker)}
+                >
+                  {emojiIcon}
+                </Button>
+              </div>
+              <div className=" absolute">
+                <EmojiPicker
+                  open={openEmojiPicker}
+                  onEmojiClick={(e) => {
+                    setEmojiIcon(e.emoji);
+                    setOpenEmojiPicker(false);
+                  }}
+                ></EmojiPicker>
+              </div>
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
-              </Label>
-              <Input
-                id="name"
-                defaultValue="Pedro Duarte"
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="username" className="text-right">
-                Username
-              </Label>
-              <Input
-                id="username"
-                defaultValue="@peduarte"
-                className="col-span-3"
-              />
-            </div>
+          <div className="mt-2">
+            <h2 className="text-black font-medium my-1">Budget Name</h2>
+            <Input
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Home Decor"
+            ></Input>
+          </div>
+          <div className="mt-2">
+            <h2 className="text-black font-medium my-1">Budget Amount</h2>
+            <Input
+              type="number"
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="e.g. 5000$"
+            ></Input>
           </div>
           <DialogFooter>
-            <Button type="submit">Save changes</Button>
+            <DialogClose asChild>
+              <Button
+                disabled={!(name && amount)}
+                onClick={() => onCreateBudget()}
+                type="submit"
+              >
+                Create Budget
+              </Button>
+            </DialogClose>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -6,6 +6,6 @@ export default defineConfig({
   schema: './utils/schema.jsx',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.NEXT_PUBLIC_DATABASE_URL,
+    url:'postgresql://kb:wpBJZHsc7M4L@ep-dark-bar-a5fte3st.us-east-2.aws.neon.tech/expenses-tracker?sslmode=require',
   },
 });
