@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-
+import { v4 as uuidv4 } from 'uuid'; // Import UUID generator
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,22 +27,30 @@ const CreateBudget = () => {
   const [amount, setAmount] = useState();
   const { user } = useUser();
 
+ 
+
   const onCreateBudget = async () => {
-    const result = await db
-      .insert(Budgets)
-      .values({
-        id: user?.id,
-        name: name,
-        amount: amount,
-        createdBy: user?.primaryEmailAddress?.emailAddress,
-        icon: emojiIcon,
-      })
-      .returning({ insertedId: Budgets.id });
-    if (result) {
-      toast("New Budget Added!");
+    try {
+      const result = await db
+        .insert(Budgets)
+        .values({
+          id: uuidv4(), // Generate a unique ID for the budget
+          name: name,
+          amount: amount,
+          createdBy: user?.primaryEmailAddress?.emailAddress,
+          icon: emojiIcon,
+        })
+        .returning({ insertedId: Budgets.id });
+  
+      if (result.length > 0) {
+        toast("New Budget Added!");
+      }
+    } catch (error) {
+      console.error("Error creating budget:", error);
+      toast("Failed to create budget. Please try again.");
     }
   };
-
+  
   return (
     <div>
       <Dialog>
