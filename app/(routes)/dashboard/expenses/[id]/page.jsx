@@ -1,4 +1,5 @@
 "use client";
+
 import { db } from "@/utils/dbConfig";
 import { Budgets, Expenses } from "@/utils/schema";
 import { useUser } from "@clerk/nextjs";
@@ -21,9 +22,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import EditBudget from "../_components/EditBudget";
 
 const ExpensesScreen = ({ params }) => {
-  const [budgetInfo, setBudgetInfo] = useState();
+  const [budgetInfo, setBudgetInfo] = useState(null);
   const { user } = useUser();
   const [expensesList, setExpensesList] = useState([]);
 
@@ -47,7 +49,7 @@ const ExpensesScreen = ({ params }) => {
         .from(Budgets)
         .leftJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
         .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
-        .where(eq(Budgets.id, params.id))  // Use params.id directly
+        .where(eq(Budgets.id, params.id)) // Use params.id directly
         .groupBy(Budgets.id);
 
       setBudgetInfo(result[0]);
@@ -62,7 +64,7 @@ const ExpensesScreen = ({ params }) => {
       const result = await db
         .select()
         .from(Expenses)
-        .where(eq(Expenses.budgetId, params.id));  // Use params.id directly
+        .where(eq(Expenses.budgetId, params.id)); // Use params.id directly
       setExpensesList(result);
     } catch (error) {
       console.error("Error fetching expenses:", error);
@@ -74,12 +76,11 @@ const ExpensesScreen = ({ params }) => {
     try {
       const result = await db
         .delete(Budgets)
-        .where(eq(Budgets.id, params.id))  // Use params.id directly
+        .where(eq(Budgets.id, params.id)) // Use params.id directly
         .returning();
       if (result) {
         toast("Budget is deleted");
-        // Instead of useRouter, use replace the location manually
-        window.location.href = "/dashboard/budgets";
+        window.location.href = "/dashboard/budgets"; // Replace useRouter with manual redirect
       }
     } catch (error) {
       console.error("Error deleting budget:", error);
@@ -90,30 +91,39 @@ const ExpensesScreen = ({ params }) => {
     <div className="p-10">
       <h2 className="text-2xl font-bold flex justify-between items-center">
         My Expenses
-        <AlertDialog>
-          <AlertDialogTrigger>
-            <Button variant="destructive">
-              <Trash />
-              Delete
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your current budget along with expenses.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={deleteBudget}>
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <div className="flex gap-2">
+          {budgetInfo && (
+            <EditBudget
+              refreshData={getBudgetInfo}
+              budgetInfo={budgetInfo}
+            />
+          )}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash />
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  your current budget along with expenses.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={deleteBudget}>
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 mt-5 gap-5">
         {budgetInfo ? (
           <BudgetItem budget={budgetInfo} />
@@ -125,7 +135,10 @@ const ExpensesScreen = ({ params }) => {
 
       <div className="mt-5">
         <h2 className="font-bold text-lg">Latest Expenses</h2>
-        <ExpenseListTable refreshData={getBudgetInfo} expensesList={expensesList} />
+        <ExpenseListTable
+          refreshData={getBudgetInfo}
+          expensesList={expensesList}
+        />
       </div>
     </div>
   );
