@@ -2,16 +2,20 @@
 import { db } from "@/utils/dbConfig";
 import { Budgets, Expenses } from "@/utils/schema";
 import { useUser } from "@clerk/nextjs";
-import { eq, getTableColumns, sql } from "drizzle-orm";
+import { desc, eq, getTableColumns, sql } from "drizzle-orm";
 import React, { useEffect, useState } from "react";
 import { BudgetItem } from "../../budgets/_components/BudgetItem";
 import AddExpense from "../_components/AddExpense";
+import ExpenseListTable from "../_components/ExpenseListTable";
 
 const ExpensesScreen = ({ params }) => {
   const [budgetInfo, setBudgetInfo] = useState();
   const { user } = useUser();
+  const [expensesList,setExpensesList] = useState([])
   useEffect(() => {
     user && getBudgetInfo();
+    getExpensesList()
+    
   }, [user]);
   const getBudgetInfo = async () => {
     try {
@@ -31,12 +35,17 @@ const ExpensesScreen = ({ params }) => {
         .groupBy(Budgets.id);
 
       setBudgetInfo(result[0]);
-      // setBudgetList(result);
-      // return result;
+   
     } catch (error) {
       console.error("Error fetching budget list:", error); // Error handling
     }
   };
+
+
+  const getExpensesList=async()=>{
+    const result=await db.select().from(Expenses).where(eq(Expenses.budgetId,params.id));
+    setExpensesList(result)
+  }
 
   return (
     <div className="p-10">
@@ -48,6 +57,10 @@ const ExpensesScreen = ({ params }) => {
           <div className="h-[150px] w-full bg-slate-200 rounded-lg animate-pulse"></div>
         )}
         <AddExpense refreshData={()=>getBudgetInfo()} budgetId={params.id}></AddExpense>
+      </div>
+      <div className="mt-5">
+        <h2 className="font-bold text-lg">Latest Expenses</h2>
+      <ExpenseListTable refreshData={()=>getBudgetInfo()} expensesList={expensesList}></ExpenseListTable>
       </div>
     </div>
   );

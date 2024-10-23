@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { db } from "@/utils/dbConfig";
 import { Budgets, Expenses } from "@/utils/schema";
 import { useUser } from "@clerk/nextjs";
+import moment from "moment/moment";
 import { root } from "postcss";
 import React, { useState } from "react";
 import { toast } from "sonner";
@@ -18,7 +19,7 @@ const AddExpense = ({ budgetId,refreshData }) => {
       name:name,
       amount:amount,
       budgetId:budgetId,
-      createdAt:user?.primaryEmailAddress?.emailAddress
+      createdAt:moment().format("DD/MM/YYY")
     }).returning({insertedId:Budgets?.id})
     console.log(result)
     if(result){

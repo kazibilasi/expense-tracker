@@ -36,7 +36,7 @@ const CreateBudget = ({refreshData}) => {
         .values({
           id: uuidv4(), // Generate a unique ID for the budget
           name: name,
-          amount: amount,
+          amount:amount,
           createdBy: user?.primaryEmailAddress?.emailAddress,
           icon: emojiIcon,
         })
