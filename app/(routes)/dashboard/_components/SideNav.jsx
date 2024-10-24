@@ -35,9 +35,7 @@ const SideNav = () => {
   ]
 
   const path = usePathname()
-  useEffect(()=>{
-    console.log(path)
-  },[path])
+  
 
   return <div className="h-screen">
     <img className=" p-4" src={'./logo.svg'} alt="" />

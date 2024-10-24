@@ -21,7 +21,7 @@ const AddExpense = ({ budgetId,refreshData }) => {
       budgetId:budgetId,
       createdAt:moment().format("DD/MM/YYY")
     }).returning({insertedId:Budgets?.id})
-    console.log(result)
+   
     if(result){
       refreshData()
       toast('New expenses added')

@@ -5,6 +5,8 @@ import CardInfo from "./_components/CardInfo";
 import { db } from "@/utils/dbConfig";
 import { Budgets, Expenses } from "@/utils/schema";
 import { desc, eq, sql } from "drizzle-orm";
+import BarChartDashboard from "./_components/BarChartDashboard";
+
 
 const Dashboard = () => {
   const { user } = useUser();
@@ -36,7 +38,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
-      console.log("User data:", user); // For debugging user object
+     
       getBudgetList();
     }
   }, [user]);
@@ -54,6 +56,15 @@ const Dashboard = () => {
       ) : (
         <p>No budgets found.</p> // Gracefully handle empty budget list
       )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 mt-5">
+        <div className="col-span-2">
+         <BarChartDashboard budgetList={budgetList}></BarChartDashboard>
+        </div>
+        <div>
+          Other content
+        </div>
+      </div>
     </div>
   );
 };
