@@ -45,7 +45,7 @@ const CardInfo = ({ budgetList }) => {
           <div className="p-7 border rounded-lg flex justify-between items-center">
             <div>
               <h2 className="text-sm">No. Of Budget</h2>
-              <h2 className="font-bold">{budgetList.length}</h2>
+              <h2 className="font-bold text-2xl">{budgetList.length}</h2>
             </div>
             <Wallet className="bg-primary text-white p-3 h-12 w-12 rounded-full text-2xl" />
           </div>

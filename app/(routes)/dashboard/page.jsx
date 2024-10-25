@@ -12,7 +12,7 @@ import ExpenseListTable from "./expenses/_components/ExpenseListTable";
 const Dashboard = () => {
   const { user } = useUser();
   const [budgetList, setBudgetList] = useState([]);
-  const [expensesList, setExpensesList]= useState([])
+  const [expensesList, setExpensesList] = useState([]);
 
   const getBudgetList = async () => {
     try {
@@ -36,7 +36,7 @@ const Dashboard = () => {
         .orderBy(desc(Budgets.id));
 
       setBudgetList(result);
-      getAllExpenses()
+      getAllExpenses();
     } catch (error) {
       console.error("Error fetching budget list:", error);
     }
@@ -44,19 +44,20 @@ const Dashboard = () => {
 
   /***
    * Used to get All expenses
-   * ***/ 
-  const getAllExpenses = async()=>{
-    const result = await db.select(
-      {
-        id:Expenses.id,
-        name:Expenses.name,
-        amount:Expenses.amount,
-        createdAt:Expenses.createdAt
-      }
-    ).from(Budgets).rightJoin(Expenses,eq(Budgets.id,Expenses.budgetId)).where(eq(Budgets.createdBy, user?.primaryEmailAddress.emailAddress));
-    setExpensesList(result)
-    
-  }
+   * ***/
+  const getAllExpenses = async () => {
+    const result = await db
+      .select({
+        id: Expenses.id,
+        name: Expenses.name,
+        amount: Expenses.amount,
+        createdAt: Expenses.createdAt,
+      })
+      .from(Budgets)
+      .rightJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
+      .where(eq(Budgets.createdBy, user?.primaryEmailAddress.emailAddress));
+    setExpensesList(result);
+  };
 
   useEffect(() => {
     if (user) {
@@ -79,15 +80,16 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 mt-5 gap-5">
         <div className="col-span-2">
           <BarChartDashboard budgetList={budgetList}></BarChartDashboard>
-          <ExpenseListTable expensesList={expensesList} refreshData={()=>getBudgetList()}></ExpenseListTable>
+          <ExpenseListTable
+            expensesList={expensesList}
+            refreshData={() => getBudgetList()}
+          ></ExpenseListTable>
         </div>
-
-        
 
         <div className="grid gap-5">
           <h2 className="font-bold text-2xl">Latest Budgets</h2>
           {budgetList?.map((budget, index) => (
-            <BudgetItem budget={budget} key={index}></BudgetItem>
+            <BudgetItem key={index} budget={budget}></BudgetItem>
           ))}
         </div>
       </div>

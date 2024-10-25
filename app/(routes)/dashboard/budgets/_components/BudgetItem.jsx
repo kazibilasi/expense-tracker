@@ -9,7 +9,7 @@ export const BudgetItem = ({ budget }) => {
     return perc.toFixed(2);  // Return a fixed decimal percentage
   };
 
-  return budget&&(
+  return (
     <Link href={`/dashboard/expenses/${budget?.id}`} passHref>
       <div className="p-5 border rounded-r-lg hover:shadow-md cursor-pointer h-[170px]">
         <div className="flex gap-2 items-center justify-between">

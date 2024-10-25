@@ -1,5 +1,6 @@
 import React from "react";
 
+
 const Hero = () => {
   return (
     <section className="bg-gray-50">
@@ -27,6 +28,7 @@ const Hero = () => {
 
            
           </div>
+          
         </div>
       </div>
     </section>
