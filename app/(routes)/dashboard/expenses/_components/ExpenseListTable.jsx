@@ -18,6 +18,7 @@ const ExpenseListTable = ({ expensesList ,refreshData}) => {
   }
   return (
     <div className="mt-3">
+       <h2 className="font-bold text-lg mb-4 mt-5">Latest Expenses</h2>
       {/* Header row */}
       <div className="grid grid-cols-4 bg-slate-200 p-2 font-bold">
         <h2>Name</h2>
@@ -27,7 +28,7 @@ const ExpenseListTable = ({ expensesList ,refreshData}) => {
       </div>
 
       {/* Expense list rows */}
-      {expensesList.map((expenses, index) => (
+      {expensesList?.map((expenses, index) => (
         <div key={index} className="grid grid-cols-4 bg-white p-2 border-b">
           <h2>{expenses?.name}</h2>
           <h2>${parseFloat(expenses?.amount).toFixed(2)}</h2>
