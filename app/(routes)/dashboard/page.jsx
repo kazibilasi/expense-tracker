@@ -6,8 +6,9 @@ import { db } from "@/utils/dbConfig";
 import { Budgets, Expenses } from "@/utils/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import BarChartDashboard from "./_components/BarChartDashboard";
-import { BudgetItem } from "./budgets/_components/BudgetItem";
+
 import ExpenseListTable from "./expenses/_components/ExpenseListTable";
+import { BudgetItem } from "./budgets/_components/BudgetItem";
 
 const Dashboard = () => {
   const { user } = useUser();
@@ -22,25 +23,24 @@ const Dashboard = () => {
           name: Budgets.name,
           createdBy: Budgets.createdBy,
           amount: Budgets.amount,
+          icon: Budgets.icon,  // Include icon in the select statement
           // Using COALESCE to replace null with 0 for totalSpend
           totalSpend:
-            sql`COALESCE(SUM(CAST(${Expenses.amount} AS NUMERIC)))`.mapWith(
-              Number
-            ),
+            sql`COALESCE(SUM(CAST(${Expenses.amount} AS NUMERIC)))`.mapWith(Number),
           totalItem: sql`COUNT(${Expenses.id})`.mapWith(Number),
         })
         .from(Budgets)
         .leftJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
         .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
-        .groupBy(Budgets.id)
-        .orderBy(desc(Budgets.id));
-
+        .groupBy(Budgets.id);
+  
       setBudgetList(result);
       getAllExpenses();
     } catch (error) {
       console.error("Error fetching budget list:", error);
     }
   };
+  
 
   /***
    * Used to get All expenses
@@ -88,9 +88,11 @@ const Dashboard = () => {
 
         <div className="grid gap-5">
           <h2 className="font-bold text-2xl">Latest Budgets</h2>
-          {budgetList?.map((budget, index) => (
-            <BudgetItem key={index} budget={budget}></BudgetItem>
-          ))}
+          <div>
+            {budgetList?.map((budget, index) => (
+              <BudgetItem budget={budget} key={index}></BudgetItem>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -23,11 +23,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import EditBudget from "../_components/EditBudget";
+import { useRouter } from "next/navigation";
 
 const ExpensesScreen = ({ params }) => {
   const [budgetInfo, setBudgetInfo] = useState(null);
   const { user } = useUser();
   const [expensesList, setExpensesList] = useState([]);
+  const route = useRouter()
 
   // Get budget information and expenses once the user is available
   useEffect(() => {
@@ -53,6 +55,7 @@ const ExpensesScreen = ({ params }) => {
         .groupBy(Budgets.id);
 
       setBudgetInfo(result[0]);
+      getExpensesList()
     } catch (error) {
       console.error("Error fetching budget info:", error);
     }
@@ -74,14 +77,17 @@ const ExpensesScreen = ({ params }) => {
   // Delete the budget
   const deleteBudget = async () => {
     try {
-      const result = await db
-        .delete(Budgets)
-        .where(eq(Budgets.id, params.id)) // Use params.id directly
+      const deleteExpense = await db
+        .delete(Expenses)
+        .where(eq(Expenses.budgetId, params.id)).returning(); // Use params.id directly
+        
+      if (deleteExpense) {
+       const result = await db.delete(Budgets)
+       .where(eq(Budgets.id,params.id))
         .returning();
-      if (result) {
-        toast("Budget is deleted");
-        window.location.href = "/dashboard/budgets"; // Replace useRouter with manual redirect
       }
+      toast('Budget Deleted!')
+      route.replace('/dashboard/budgets')
     } catch (error) {
       console.error("Error deleting budget:", error);
     }
@@ -115,7 +121,7 @@ const ExpensesScreen = ({ params }) => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={deleteBudget}>
+                <AlertDialogAction onClick={()=>deleteBudget()}>
                   Continue
                 </AlertDialogAction>
               </AlertDialogFooter>

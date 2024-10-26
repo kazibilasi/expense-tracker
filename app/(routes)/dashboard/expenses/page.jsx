@@ -1,34 +1,47 @@
+// UserExpensesContainer.js
 "use client";
-
+import React, { useEffect, useState } from "react";
 import { db } from "@/utils/dbConfig";
+import { Expenses, Budgets } from "@/utils/schema";
+import { useUser } from "@clerk/nextjs";
+import { eq } from "drizzle-orm";
 import ExpenseListTable from "./_components/ExpenseListTable";
-import { useEffect, useState } from "react";
-import { Expenses } from "@/utils/schema";
 
-const Page = () => {
+
+const UserExpensesContainer = () => {
+  const { user } = useUser();
   const [expensesList, setExpensesList] = useState([]);
 
-  const refreshData = async () => {
+  // Fetch expenses for the logged-in user
+  const getUserExpenses = async () => {
     try {
       const result = await db
-        .select()
-        .from(Expenses);
+        .select({
+          id: Expenses.id,
+          name: Expenses.name,
+          amount: Expenses.amount,
+          createdAt: Expenses.createdAt,
+        })
+        .from(Budgets)
+        .rightJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
+        .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress)); // Filter by user
       setExpensesList(result);
     } catch (error) {
-      console.error("Error fetching expenses:", error);
+      console.error("Error fetching user expenses:", error);
     }
   };
 
   useEffect(() => {
-    refreshData();
-  }, []);
+    if (user) {
+      getUserExpenses();
+    }
+  }, [user]);
 
-  return (
-    <div className=" p-5">
-      <h1>Expense Management</h1>
-      <ExpenseListTable expensesList={expensesList} refreshData={refreshData} />
+  return(
+    <div  className=" p-6">
+       <ExpenseListTable expensesList={expensesList} refreshData={getUserExpenses} />
     </div>
   );
 };
 
-export default Page;
+export default UserExpensesContainer;

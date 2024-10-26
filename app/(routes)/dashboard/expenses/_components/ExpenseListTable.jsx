@@ -6,13 +6,13 @@ import { Trash } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 
-const ExpenseListTable = ({ expensesList }) => {
+const ExpenseListTable = ({ expensesList,refreshData }) => {
   const deleteExpense =async (expense)=>{
       const result = await db.delete(Expenses).where(eq(
         Expenses.id,expense.id
       )).returning()
       if(result){
-       
+       refreshData()
         toast('Expnese Detelted!');
         
       }
@@ -36,7 +36,7 @@ const ExpenseListTable = ({ expensesList }) => {
           <h2>{expenses?.createdAt}</h2>
           <h2>
             <button  >
-              <Trash onClick={()=>deleteExpense(expenses)}  className="text-red-600 hover:text-red-800  ml-10 lg:ml-0"  />
+              <Trash onClick={()=>deleteExpense(expenses)}  className="text-red-600 hover:text-red-800 "  />
             </button>
           </h2>
         </div>
